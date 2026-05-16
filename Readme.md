@@ -23,8 +23,8 @@ http://localhost:5000/scrape?keyword=startup
 
 ```bash
 pip install -r requirements.txt
-python scheduler_job.py   # starts scraper + scheduler
-python app.py             # starts dashboard
+python scheduler_job.py 
+python app.py 
 ```
 
 ---
