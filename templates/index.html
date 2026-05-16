@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LaunchPad — Startup Opportunities</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <span class="logo">Startup Opportunity Aggregator</span>
+      <button class="scrape-btn" id="scrapeBtn" onclick="triggerScrape()">↻ Scrape Now</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num">{{ total }}</div>
+        <div class="stat-label">Opportunities</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">{{ all_sources | length }}</div>
+        <div class="stat-label">Sources</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">{{ all_types | length }}</div>
+        <div class="stat-label">Types</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <form method="GET" action="/" class="filter-bar">
+      <input type="text" name="keyword" placeholder="  Search opportunities..." value="{{ keyword }}" class="input"/>
+
+      <select name="type" class="input" onchange="this.form.submit()">
+        <option value="">All Types</option>
+        {% for t in all_types %}
+        <option value="{{ t }}" {% if opp_type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="source" class="input" onchange="this.form.submit()">
+        <option value="">All Sources</option>
+        {% for s in all_sources %}
+        <option value="{{ s }}" {% if source == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="sort" class="input" onchange="this.form.submit()">
+        <option value="asc"  {% if sort == 'asc'  %}selected{% endif %}>Deadline ↑</option>
+        <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Deadline ↓</option>
+      </select>
+
+      <button type="submit" class="btn-primary">Search</button>
+
+      {% if keyword or opp_type or source %}
+      <a href="/" class="btn-ghost">Clear</a>
+      {% endif %}
+
+      <div class="export-btns">
+        <a href="/export/csv?keyword={{ keyword }}&type={{ opp_type }}&source={{ source }}" class="btn-export">⬇ CSV</a>
+        <a href="/export/json?keyword={{ keyword }}&type={{ opp_type }}&source={{ source }}" class="btn-export">⬇ JSON</a>
+      </div>
+    </form>
+
+    <p class="results-label">{{ total }} result{% if total != 1 %}s{% endif %}</p>
+
+    {% if opportunities %}
+    <div class="grid">
+      {% for opp in opportunities %}
+      <div class="card">
+        <div class="card-top">
+          <span class="badge {{ opp.type | lower }}">{{ opp.type }}</span>
+          <span class="source">{{ opp.source }}</span>
+          <a href="{{ opp.link }}" target="_blank" class="ext-link" title="Open link">↗</a>
+        </div>
+
+        <h3 class="card-title">
+          <a href="{{ opp.link }}" target="_blank">{{ opp.title }}</a>
+        </h3>
+
+        <div class="card-info">
+          {% if opp.organizer and opp.organizer != 'Unknown' %}
+          <span>👤 {{ opp.organizer }}</span>
+          {% endif %}
+          {% if opp.location %}
+          <span>📍 {{ opp.location }}</span>
+          {% endif %}
+          {% if opp.deadline %}
+          <span class="deadline">📅 {{ opp.deadline }}</span>
+          {% endif %}
+        </div>
+
+        {% if opp.tags %}
+        <div class="tags">
+          {% for tag in opp.tags.split(', ') %}
+          <span class="tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty">
+      <p>😕 No results found. Try different filters or <button onclick="triggerScrape()" class="link-btn">scrape fresh data</button>.</p>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <footer>
+    <div class="container"></div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    async function triggerScrape() {
+      const btn = document.getElementById('scrapeBtn');
+      btn.disabled = true;
+      btn.textContent = ' Scraping...';
+      showToast('Scraping in progress...', 'info');
+      try {
+        const res  = await fetch('/scrape?keyword=startup');
+        const data = await res.json();
+        showToast(`✓ Scraped ${data.scraped}, inserted ${data.inserted} new.`, 'success');
+        setTimeout(() => location.reload(), 1800);
+      } catch {
+        showToast('Scrape failed. Check logs.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '↻ Scrape Now';
+      }
+    }
+
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.className = 'toast', 3000);
+    }
+  </script>
+
+</body>
+</html>
