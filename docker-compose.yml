@@ -10,14 +10,8 @@ services:
       - ./data:/app/data
       - ./exports:/app/exports
     environment:
-      - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   scheduler:
     build: .
@@ -27,6 +21,5 @@ services:
       - ./data:/app/data
       - ./exports:/app/exports
     environment:
-      - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
     restart: unless-stopped

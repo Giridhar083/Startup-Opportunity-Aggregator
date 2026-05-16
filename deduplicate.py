@@ -1,11 +1,8 @@
-# deduplicate.py — removes duplicate opportunities before and after DB insert
-
 import sqlite3
 from config import DB_NAME
 
 
 def deduplicate_list(opps):
-    """Remove dupes from a list by checking the link field."""
     seen = set()
     clean = []
     for opp in opps:
@@ -18,17 +15,16 @@ def deduplicate_list(opps):
 
 
 def remove_duplicates_from_db():
-    """Keep only the first row for each (title, organizer, deadline) combo."""
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
+    # delete rows with duplicate links, keep the first one
     cur.execute("""
         DELETE FROM opportunities
         WHERE id NOT IN (
-            SELECT MIN(id) FROM opportunities
-            GROUP BY title, organizer, deadline
+            SELECT MIN(id) FROM opportunities GROUP BY link
         )
     """)
-    print(f"[Dedup] removed {cur.rowcount} DB duplicates")
+    print(f"[Dedup] removed {cur.rowcount} duplicates from DB")
     conn.commit()
     conn.close()
 

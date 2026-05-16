@@ -17,7 +17,7 @@
   </nav>
 
   <div class="container">
-    <!-- Stats -->
+
     <div class="stats-row">
       <div class="stat-box">
         <div class="stat-num">{{ total }}</div>
@@ -33,7 +33,6 @@
       </div>
     </div>
 
-    <!-- Filters -->
     <form method="GET" action="/" class="filter-bar">
       <input type="text" name="keyword" placeholder="  Search opportunities..." value="{{ keyword }}" class="input"/>
 
@@ -116,35 +115,25 @@
   </div>
 
   <footer>
-    <div class="container"></div>
+    <div class="container">Startup Opportunity Aggregator</div>
   </footer>
-
-  <div class="toast" id="toast"></div>
 
   <script>
     async function triggerScrape() {
       const btn = document.getElementById('scrapeBtn');
       btn.disabled = true;
       btn.textContent = ' Scraping...';
-      showToast('Scraping in progress...', 'info');
       try {
         const res  = await fetch('/scrape?keyword=startup');
         const data = await res.json();
-        showToast(`✓ Scraped ${data.scraped}, inserted ${data.inserted} new.`, 'success');
-        setTimeout(() => location.reload(), 1800);
+        alert('Done! Scraped ' + data.scraped + ', inserted ' + data.inserted + ' new.');
+        location.reload();
       } catch {
-        showToast('Scrape failed. Check logs.', 'error');
+        alert('Scrape failed. Check if server is running.');
       } finally {
         btn.disabled = false;
         btn.textContent = '↻ Scrape Now';
       }
-    }
-
-    function showToast(msg, type) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = `toast ${type} show`;
-      setTimeout(() => t.className = 'toast', 3000);
     }
   </script>
 

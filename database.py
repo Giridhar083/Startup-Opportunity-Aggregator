@@ -10,21 +10,25 @@ def create_table():
     conn = connect_db()
     conn.execute("""
         CREATE TABLE IF NOT EXISTS opportunities (
-            id        INTEGER PRIMARY KEY AUTOINCREMENT,title     TEXT,type TEXT,organizer TEXT,location  TEXT,deadline  TEXT,link      TEXT UNIQUE,source    TEXT,tags      TEXT)""")
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            title     TEXT,
+            type      TEXT,
+            organizer TEXT,
+            location  TEXT,
+            deadline  TEXT,
+            link      TEXT UNIQUE,
+            source    TEXT,
+            tags      TEXT
+        )
+    """)
     conn.commit()
-    _migrate(conn)
+    # add tags column if it doesn't exist (in case of old db)
+    try:
+        conn.execute("ALTER TABLE opportunities ADD COLUMN tags TEXT")
+        conn.commit()
+    except:
+        pass
     conn.close()
-
-def _migrate(conn):
-    existing = {row[1] for row in conn.execute("PRAGMA table_info(opportunities)")}
-    migrations = {
-        "tags": "ALTER TABLE opportunities ADD COLUMN tags TEXT",
-    }
-    for column, sql in migrations.items():
-        if column not in existing:
-            conn.execute(sql)
-            print(f"[DB] migrated: added column '{column}'")
-    conn.commit()
 
 def insert_opportunity(data):
     conn = connect_db()
@@ -38,7 +42,7 @@ def insert_opportunity(data):
         conn.commit()
         return True
     except sqlite3.IntegrityError:
-        return False  # duplicate link, skip
+        return False
     finally:
         conn.close()
 
