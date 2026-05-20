@@ -22,7 +22,6 @@ def create_table():
         )
     """)
     conn.commit()
-    # add tags column if it doesn't exist (in case of old db)
     try:
         conn.execute("ALTER TABLE opportunities ADD COLUMN tags TEXT")
         conn.commit()
