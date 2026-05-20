@@ -13,9 +13,6 @@ from config      import SCRAPE_INTERVAL_HOURS
 app = Flask(__name__)
 create_table()
 
-
-# ── Scheduler (runs in-process so Render only needs one web service) ──────────
-
 def run_pipeline():
     from datetime import datetime
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] scheduled pipeline starting...")
@@ -31,12 +28,7 @@ def run_pipeline():
 scheduler = BackgroundScheduler()
 scheduler.add_job(run_pipeline, "interval", hours=SCRAPE_INTERVAL_HOURS)
 scheduler.start()
-
-# Run once at startup in a background thread so the server starts immediately
 threading.Thread(target=run_pipeline, daemon=True).start()
-
-
-# ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
