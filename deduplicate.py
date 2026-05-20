@@ -1,7 +1,6 @@
 import sqlite3
 from config import DB_NAME
 
-
 def deduplicate_list(opps):
     seen = set()
     clean = []
@@ -12,12 +11,9 @@ def deduplicate_list(opps):
             clean.append(opp)
     print(f"[Dedup] {len(opps)} → {len(clean)} (removed {len(opps) - len(clean)})")
     return clean
-
-
 def remove_duplicates_from_db():
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
-    # delete rows with duplicate links, keep the first one
     cur.execute("""
         DELETE FROM opportunities
         WHERE id NOT IN (
@@ -27,7 +23,5 @@ def remove_duplicates_from_db():
     print(f"[Dedup] removed {cur.rowcount} duplicates from DB")
     conn.commit()
     conn.close()
-
-
 if __name__ == "__main__":
     remove_duplicates_from_db()
