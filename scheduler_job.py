@@ -25,11 +25,9 @@ def run_pipeline():
 
 if __name__ == "__main__":
     create_table()
-    run_pipeline()  # run once immediately
+    run_pipeline()
 
     scheduler = BlockingScheduler()
-
-    # Set the interval to hours using the config variable
     scheduler.add_job(run_pipeline, "interval", hours=SCRAPE_INTERVAL_HOURS)
 
     print(f"Scheduler running, next scrape in {SCRAPE_INTERVAL_HOURS} hours. Ctrl+C to stop.")
