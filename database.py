@@ -8,19 +8,7 @@ def connect_db():
 
 def create_table():
     conn = connect_db()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS opportunities (
-            id        INTEGER PRIMARY KEY AUTOINCREMENT,
-            title     TEXT,
-            type      TEXT,
-            organizer TEXT,
-            location  TEXT,
-            deadline  TEXT,
-            link      TEXT UNIQUE,
-            source    TEXT,
-            tags      TEXT
-        )
-    """)
+    conn.execute("CREATE TABLE IF NOT EXISTS opportunities (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, type TEXT, organizer TEXT, location TEXT, deadline TEXT, link TEXT UNIQUE, source TEXT, tags TEXT);")
     conn.commit()
     try:
         conn.execute("ALTER TABLE opportunities ADD COLUMN tags TEXT")
@@ -31,20 +19,17 @@ def create_table():
 
 def insert_opportunity(data):
     conn = connect_db()
+
     try:
-        conn.execute("""
-            INSERT INTO opportunities
-              (title, type, organizer, location, deadline, link, source, tags)
-            VALUES
-              (:title, :type, :organizer, :location, :deadline, :link, :source, :tags)
-        """, data)
+        conn.execute("INSERT INTO opportunities (title, type, organizer, location, deadline, link, source, tags) VALUES (:title, :type, :organizer, :location, :deadline, :link, :source, :tags)", data)
         conn.commit()
         return True
+
     except sqlite3.IntegrityError:
         return False
+
     finally:
         conn.close()
-
 def get_opportunities(keyword="", opp_type="", source="", sort="asc"):
     query = "SELECT * FROM opportunities WHERE 1=1"
     params = []
